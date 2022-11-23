@@ -14,6 +14,9 @@ const Book = require('./models/book.js');
 const app = express();
 app.use(cors());
 
+// must have to receive json request
+app.use(express.json());
+
 mongoose.connect(process.env.MONGODB_URL);
 
 
@@ -32,7 +35,14 @@ app.get('/', (request, response) => {
 
 });
 
+
+
 app.get('/book', getBooks);
+app.post('/book', postBooks);
+// Path parameter - a variable that we declare in the path
+app.delete('/book/:id', deleteBooks);
+
+
 
 async function getBooks(req, res, next) {
   try {
@@ -45,13 +55,45 @@ async function getBooks(req, res, next) {
   }
 }
 
+// for a query
+// http://localhost:3001/book?color=orange
+// access orange
+//  req.query.color
+
+async function postBooks(req, res, next) {
+  try {
+    console.log(req.body);
+    let createbook = await Book.create(req.body);
+    res.send(createbook);
+
+  }catch(err){
+    next(err);
+  }
+}
+
+
+async function deleteBooks(req, res, next) {
+  try {
+    // get the id of the book we want to delete
+    console.log(req.params.id);
+
+    // make a request to the database to delete the book in question
+    // Do not assume that you will get a response:
+    await Book.findByIdAndDelete(req.params.id);
+    res.send('book deleted');
+
+  }catch(err){
+    next(err);
+  }
+}
+
 
 app.get('*', (req, res) => {
   res.status(404).send('Not available');
 });
 
 // ERROR
-app.use((error, request, response,next) => {
+app.use((error, request, response,) => {
   response.status(500).send(error.message);
 });
 
