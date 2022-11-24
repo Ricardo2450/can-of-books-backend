@@ -41,6 +41,7 @@ app.get('/book', getBooks);
 app.post('/book', postBooks);
 // Path parameter - a variable that we declare in the path
 app.delete('/book/:id', deleteBooks);
+app.put('/book/:id', putBooks);
 
 
 
@@ -62,9 +63,9 @@ async function getBooks(req, res, next) {
 
 async function postBooks(req, res, next) {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     let createbook = await Book.create(req.body);
-    res.send(createbook);
+    res.status(200).send(createbook);
 
   }catch(err){
     next(err);
@@ -75,12 +76,31 @@ async function postBooks(req, res, next) {
 async function deleteBooks(req, res, next) {
   try {
     // get the id of the book we want to delete
-    console.log(req.params.id);
+    // console.log(req.params.id);
 
     // make a request to the database to delete the book in question
     // Do not assume that you will get a response:
     await Book.findByIdAndDelete(req.params.id);
-    res.send('book deleted');
+    res.status(200).send('book deleted');
+
+  }catch(err){
+    next(err);
+  }
+}
+
+
+async function putBooks(req, res, next) {
+  try {
+    // console.log(req.body);
+    let id = req.params.id;
+    let updatedBookData = req.body;
+
+    let updatedBook = await Book.findByIdAndUpdate(id, updatedBookData, {new: true, overwrites: true});
+    res.status(200).send(updatedBook);
+
+
+    let createbook = await Book.create(req.body);
+    res.status(200).send(createbook);
 
   }catch(err){
     next(err);
